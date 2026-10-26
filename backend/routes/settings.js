@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { query } from '../db/pool.js';
+import { ensureDefaultSettings } from '../db/defaultSettings.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 const router = Router();
@@ -9,6 +10,7 @@ const router = Router();
 router.get(
   '/',
   asyncHandler(async (_req, res) => {
+    await ensureDefaultSettings(query);
     const { rows } = await query('SELECT key, value FROM app_settings');
     const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
     res.json({

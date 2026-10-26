@@ -1,39 +1,15 @@
 // backend/db/seed.js
 import bcrypt from 'bcryptjs';
 import 'dotenv/config';
-import { pool } from './pool.js';
+import { pool, query } from './pool.js';
+import { ensureDefaultSettings } from './defaultSettings.js';
 
 function id(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-async function ensureSetting(key, value) {
-  await pool.query(
-    `INSERT INTO app_settings(key, value) VALUES ($1, $2)
-     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
-     WHERE app_settings.value = '[]'::jsonb
-        OR app_settings.value = 'null'::jsonb`,
-    [key, JSON.stringify(value)],
-  );
-}
-
 async function main() {
-  await ensureSetting('districts', [
-    'Maseru',
-    'Berea',
-    'Leribe',
-    'Mafeteng',
-    "Mohale's Hoek",
-    'Quthing',
-    "Qacha's Nek",
-    'Butha-Buthe',
-    'Mokhotlong',
-    'Thaba-Tseka',
-  ]);
-  await ensureSetting('minAge', Number(process.env.MIN_MEMBER_AGE) || 12);
-  await ensureSetting('borrowDays', Number(process.env.BORROW_DAYS) || 14);
-  await ensureSetting('maxBorrowed', Number(process.env.MAX_BORROWED) || 3);
-  await ensureSetting('roles', ['Member', 'Librarian']);
+  await ensureDefaultSettings(query);
 
   const username = process.env.ADMIN_USERNAME;
   const rawPassword = process.env.ADMIN_PASSWORD;
