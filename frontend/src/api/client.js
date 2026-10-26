@@ -1,5 +1,5 @@
 // Single place for every fetch call so the backend URL is easy to change.
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/+$/, '');
 const SESSION_KEY = 'library_member_session';
 
 function getSessionRole() {
