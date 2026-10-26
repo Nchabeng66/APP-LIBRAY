@@ -67,15 +67,31 @@ function SignupPanel({ onSwitch }) {
   const [errors, setErrors] = useState({});
   const [districts, setDistricts] = useState([]);
   const [minAge, setMinAge] = useState(null);
+  const [districtsLoading, setDistrictsLoading] = useState(true);
+  const [districtError, setDistrictError] = useState('');
 
   useEffect(() => {
+    let active = true;
     requestJson('/settings')
       .then((s) => {
-        setDistricts(s.districts || []);
+        if (!active) return;
+        const configuredDistricts = Array.isArray(s.districts) ? s.districts : [];
+        setDistricts(configuredDistricts);
         setMinAge(s.minAge ?? null);
-        if (s.districts?.length) setForm((p) => ({ ...p, district: s.districts[0] }));
+        if (configuredDistricts.length) {
+          setForm((p) => ({ ...p, district: configuredDistricts[0] }));
+        }
       })
-      .catch(() => {});
+      .catch((error) => {
+        if (active) setDistrictError(error.message || 'Could not load districts.');
+      })
+      .finally(() => {
+        if (active) setDistrictsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -125,10 +141,20 @@ function SignupPanel({ onSwitch }) {
           <div className="form-grid">
             <div className="field">
               <label htmlFor="field-su-district">District</label>
-              <select id="field-su-district" name="district" value={form.district} onChange={change}>
-                {districts.length === 0 && <option value="">Loading…</option>}
+              <select id="field-su-district" name="district" value={form.district} onChange={change}
+                disabled={districtsLoading || districts.length === 0}>
+                {districts.length === 0 && (
+                  <option value="">
+                    {districtsLoading ? 'Loading…' : 'No districts available'}
+                  </option>
+                )}
                 {districts.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
+              <span className="field-error">
+                {errors.district || districtError || (!districtsLoading && districts.length === 0
+                  ? 'Districts are not configured. Please contact the library.'
+                  : '')}
+              </span>
             </div>
             <Field label="Home Address" htmlFor="field-su-address" error={errors.address} style={{ gridColumn: 'span 2' }}>
               <input id="field-su-address" name="address" type="text" value={form.address} onChange={change} autoComplete="street-address" />

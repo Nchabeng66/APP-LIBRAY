@@ -59,6 +59,8 @@ export function validateSignupForm(data, users) {
   if (data.age === '' || Number.isNaN(Number(data.age)) || Number(data.age) < 0)
     errors.age = 'Enter a valid age.';
 
+  if (!data.district) errors.district = 'Select a district.';
+
   if (!data.address.trim()) errors.address = 'Home address is required.';
 
   if (!data.password) errors.password = 'Choose a password.';

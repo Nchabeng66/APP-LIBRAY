@@ -6,6 +6,7 @@ node_modules/
 .env.local
 .env.production
 *.env
+!frontend/.env.production
 
 # Uploads (user files should not be in git)
 backend/uploads/

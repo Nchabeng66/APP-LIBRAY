@@ -7,16 +7,18 @@ function id(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-async function upsertSetting(key, value) {
+async function ensureSetting(key, value) {
   await pool.query(
     `INSERT INTO app_settings(key, value) VALUES ($1, $2)
-     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+     WHERE app_settings.value = '[]'::jsonb
+        OR app_settings.value = 'null'::jsonb`,
     [key, JSON.stringify(value)],
   );
 }
 
 async function main() {
-  await upsertSetting('districts', [
+  await ensureSetting('districts', [
     'Maseru',
     'Berea',
     'Leribe',
@@ -28,10 +30,10 @@ async function main() {
     'Mokhotlong',
     'Thaba-Tseka',
   ]);
-  await upsertSetting('minAge', Number(process.env.MIN_MEMBER_AGE) || 12);
-  await upsertSetting('borrowDays', Number(process.env.BORROW_DAYS) || 14);
-  await upsertSetting('maxBorrowed', Number(process.env.MAX_BORROWED) || 3);
-  await upsertSetting('roles', ['Member', 'Librarian']);
+  await ensureSetting('minAge', Number(process.env.MIN_MEMBER_AGE) || 12);
+  await ensureSetting('borrowDays', Number(process.env.BORROW_DAYS) || 14);
+  await ensureSetting('maxBorrowed', Number(process.env.MAX_BORROWED) || 3);
+  await ensureSetting('roles', ['Member', 'Librarian']);
 
   const username = process.env.ADMIN_USERNAME;
   const rawPassword = process.env.ADMIN_PASSWORD;
