@@ -136,8 +136,11 @@ function MemberOrderPanel() {
     setError('');
     if (!currentUser) { setError('You must be logged in to order a book.'); return; }
     if (!bookId) { setError('Choose a book to order.'); return; }
-    if (!idNumber.trim()) { setError('Enter your membership ID number to confirm.'); return; }
-    if (idNumber.trim() !== currentUser.idNumber) { setError('That ID number does not match your account.'); return; }
+    if (!idNumber.trim()) { setError('Enter your national ID number to confirm.'); return; }
+    if (idNumber.trim() !== String(currentUser.idNumber || '').trim()) {
+      setError('That national ID number does not match your account.');
+      return;
+    }
     const book = books.find((b) => b.id === bookId);
     if (!book) { setError('That book no longer exists.'); return; }
     if (Number(book.quantity) < 1) { setError('That book is out of stock.'); return; }
@@ -165,7 +168,7 @@ function MemberOrderPanel() {
               ))}
             </select>
           </div>
-          <Field label="Your Membership ID Number" htmlFor="field-order-idnumber">
+          <Field label="Your National ID Number" htmlFor="field-order-idnumber">
             <input id="field-order-idnumber" type="text" inputMode="numeric" value={idNumber} onChange={(e) => setIdNumber(onlyDigits(e.target.value))} autoComplete="off" />
           </Field>
         </div>

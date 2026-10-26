@@ -53,8 +53,19 @@ router.post(
 // Never return the password hash to the client.
 export function publicUser(u) {
   if (!u) return null;
-  const { password_hash, ...safe } = u;
-  return safe;
+  const {
+    password_hash,
+    id_number,
+    membership_id,
+    created_at,
+    ...safe
+  } = u;
+  return {
+    ...safe,
+    idNumber: id_number,
+    membershipId: membership_id,
+    createdAt: created_at,
+  };
 }
 
 export default router;
