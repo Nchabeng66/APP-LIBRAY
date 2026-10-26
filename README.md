@@ -32,7 +32,11 @@ without overwriting settings already stored in PostgreSQL. Keep `DATABASE_URL`
 configured on the backend hosting service so application data persists in the
 database. For Render, set the backend service root directory to `backend` and
 use `npm start`; startup initializes the schema and fills missing default
-settings before serving API requests.
+settings before serving API requests. Set `ADMIN_USERNAME` and
+`ADMIN_PASSWORD` in the backend service environment. Each startup creates or
+updates the configured administrator password using bcrypt, so it matches the
+credentials used on the admin login page. Do not insert an administrator with
+a manually copied or placeholder password hash.
 
 For a separately hosted frontend, set `VITE_API_BASE` in the frontend build
 environment to the backend URL ending in `/api` (for example,
