@@ -24,10 +24,19 @@ export default function Layout() {
     <div className="app-shell">
       <nav className="sidebar" aria-label="Main navigation">
         <div className="brand">
-          <span className="brand-mark">Community Library</span>
-          <span className="brand-sub">
-            {isAuthenticated ? 'Catalog & Circulation' : 'Please log in to continue'}
-          </span>
+          <div className="brand-row">
+            <img
+              className="brand-logo"
+              src={`${import.meta.env.BASE_URL}lesotho-library-logo.svg`}
+              alt="Lesotho flag and library emblem"
+            />
+            <div className="brand-text">
+              <span className="brand-mark">Lesotho Library Community</span>
+              <span className="brand-sub">
+                {isAuthenticated ? 'Catalog & Circulation' : 'Please log in to continue'}
+              </span>
+            </div>
+          </div>
         </div>
 
         <button
@@ -61,7 +70,7 @@ export default function Layout() {
         </ul>
 
         <div className="sidebar-foot">
-          <span>Community Library</span>
+          <span>© {new Date().getFullYear()} Lesotho Community Library. All rights reserved.</span>
         </div>
       </nav>
 
