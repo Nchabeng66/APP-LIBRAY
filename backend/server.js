@@ -3,6 +3,8 @@ import cors from 'cors';
 import path from 'node:path';
 import 'dotenv/config';
 
+import { pool } from './db/pool.js';
+import { ensureAdminAccount } from './db/admin.js';
 import booksRouter from './routes/books.js';
 import onlineBooksRouter from './routes/onlineBooks.js';
 import usersRouter from './routes/users.js';
@@ -36,17 +38,31 @@ app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`Library API listening on http://localhost:${PORT}`);
-});
+async function startServer() {
+  await ensureAdminAccount(pool, {
+    username: process.env.ADMIN_USERNAME,
+    password: process.env.ADMIN_PASSWORD,
+    name: process.env.ADMIN_NAME || 'Administrator',
+    idNumber: process.env.ADMIN_ID_NUMBER || '0000000000',
+  });
 
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(
-      `Port ${PORT} is already in use. Another process (possibly an old backend) is holding it. ` +
-        `Find it with: Get-NetTCPConnection -LocalPort ${PORT}`,
-    );
-    process.exit(1);
-  }
-  throw err;
+  const server = app.listen(PORT, () => {
+    console.log(`Library API listening on http://localhost:${PORT}`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(
+        `Port ${PORT} is already in use. Another process (possibly an old backend) is holding it. ` +
+          `Find it with: Get-NetTCPConnection -LocalPort ${PORT}`,
+      );
+      process.exit(1);
+    }
+    throw err;
+  });
+}
+
+startServer().catch((err) => {
+  console.error('Could not initialize the administrator account:', err);
+  process.exit(1);
 });
